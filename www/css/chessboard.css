@@ -69,3 +69,8 @@
   top: 2px;
   left: 2px;
 }
+
+/* Starts Forked Changes */
+.chessboard {
+  margin: auto;
+}
