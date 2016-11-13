@@ -1,4 +1,3 @@
-
 var algorithm = 'random';
 var selectedFeature = 'points';
 var featureFxn = null;
@@ -105,8 +104,11 @@ var featurePoints = function(gameBoard) {
 
 
   var points = 0;
-  var gameState = gameBoard.ascii();
-  for (var i = 0; i <= 300; i++) {
+  var gameState = gameBoard.fen();
+  for (var i = 0; i <= gameState.length; i++) {
+    if (gameState[i] == ' ') {
+      break;
+    }
     switch(gameState[i]) {
       case 'P':
         points += 1;
