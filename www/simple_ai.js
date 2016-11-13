@@ -39,51 +39,61 @@ var minMaxMove = function () {
 
   var bestMove = possibleMoves[0];
   var currentMin = 9999;
+  var beta = 9999;
+  var alpha = -9999;
   var n = $('input[name="iterate"]').val();
   for (var i = 0; i < possibleMoves.length; i++) {
     game.move(possibleMoves[i]);
-    var max = maxMove(game, n);
+    var max = maxMove(game, n, alpha, beta);
     game.undo();
     if (max < currentMin) {
       currentMin = max;
       bestMove = possibleMoves[i];
     }
+    if (currentMin <= alpha) {
+      return bestMove;
+    }
+    beta = Math.min(beta, currentMin)
   }
   game.move(bestMove);
   board.position(game.fen());
 };
 
-function minMove(gameState, n) {
+function minMove(gameState, n, alpha, beta) {
   if (n == 0) {
     return featureFxn(gameState);
   } else {
     var possibleMoves = gameState.moves();
+    if (possibleMoves.length === 0) return featureFxn(gameState);
     var currentMin = 9999;
     for (var i = 0; i < possibleMoves.length; i++) {
       game.move(possibleMoves[i]);
-      var max = maxMove(game, n-1);
+      currentMin = Math.min(maxMove(game, n-1, alpha, beta),currentMin);
       game.undo();
-      if (max < currentMin) {
-        currentMin = max;
+      if (currentMin <= alpha) {
+        return currentMin;
       }
+      beta = Math.min(beta, currentMin);
     }
     return currentMin;
   }
 }
 
-function maxMove(gameState, n) {
+function maxMove(gameState, n, alpha, beta) {
   if (n == 0) {
     return featureFxn(gameState);
   } else {
     var possibleMoves = gameState.moves();
-    var currentMax = 0;
+    if (possibleMoves.length === 0) return featureFxn(gameState);
+    var currentMax = -9999;
     for (var i = 0; i < possibleMoves.length; i++) {
       game.move(possibleMoves[i]);
-      var min = minMove(game, n-1);
+      currentMax = Math.max(minMove(game, n-1, alpha, beta), currentMax);
       game.undo();
-      if (min > currentMax) {
-        currentMax = min;
+      if (currentMax >= beta) {
+        return currentMax
       }
+      alpha = Math.max(alpha, currentMax);
     }
     return currentMax;
   }
@@ -95,9 +105,9 @@ function maxMove(gameState, n) {
 var featurePoints = function(gameBoard) {
   /* Takes care of any edge cases where gameBoard is over */
   if (gameBoard.in_checkmate() && gameBoard.turn() == 'light') {
-    return 100;
-  } else if (gameBoard.in_checkmate()) {
     return -100;
+  } else if (gameBoard.in_checkmate()) {
+    return 100;
   } else if (gameBoard.game_over()) {
     return 0;
   }
@@ -228,6 +238,6 @@ $(document).ready(function() {
     algorithm = $('input[name="algorithm"]:checked').val();
   });
   $('.feature').on('click',function() {
-    selectedFeature = this.val();
+    selectedFeature = $('input[name="feature"]:checked').val();
   });
 });
