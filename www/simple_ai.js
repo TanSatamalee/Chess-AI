@@ -1,4 +1,3 @@
-var algorithm = 'random';
 var selectedFeature = 'points';
 var featureFxn = null;
 
@@ -51,7 +50,7 @@ var minMaxMove = function () {
       bestMove = possibleMoves[i];
     }
     if (currentMin <= alpha) {
-      return bestMove;
+      break;
     }
     beta = Math.min(beta, currentMin)
   }
@@ -155,8 +154,106 @@ var featurePoints = function(gameBoard) {
   return points;
 }
 
+
 var featureControl = function(gameBoard) {
-  points = 0;
+  /* Takes care of any edge cases where gameBoard is over */
+  if (gameBoard.in_checkmate() && gameBoard.turn() == 'light') {
+    return -100;
+  } else if (gameBoard.in_checkmate()) {
+    return 100;
+  } else if (gameBoard.game_over()) {
+    return 0;
+  }
+  
+  var points = 0;
+  var board_fen = (gameBoard.fen().split(" "))[0];
+  var board = [];
+  var temp = [];
+  var i, j;
+  for (i = 0; i < board_fen.length; i++) {
+    if (board_fen[i] == "/") {
+      board.push(temp);
+      temp = [];
+      continue;
+    }
+    if (!isNaN(parseInt(board_fen[i]))) {
+      for (j = 0; j < parseInt(board_fen[i]); j++) {
+        temp.push(0);
+      }
+    } else {
+      switch(board_fen[i]) {
+        case 'P':
+          temp.push(1);
+          break;
+        case 'p':
+          temp.push(-1);
+          break;
+        case 'N':
+          temp.push(3);
+          break;
+        case 'n':
+          temp.push(-3);
+          break;
+        case 'B':
+          temp.push(3);
+          break;
+        case 'b':
+          temp.push(-3);
+          break;
+        case 'R':
+          temp.push(5);
+          break;
+        case 'r':
+          temp.push(-5);
+          break;
+        case 'Q':
+          temp.push(8);
+          break;
+        case 'q':
+          temp.push(-8);
+          break;
+        case 'K':
+          temp.push(-50);
+          break;
+        case 'k':
+          temp.push(50);
+          break;
+      }
+    }
+  }
+  board.push(temp);
+
+  control_points = [
+    [0,0,0,0,0,0,0,0],
+    [0,0,0,0,0,0,0,0],
+    [0,0,1,1,1,1,0,0],
+    [0,0,1,2,2,1,0,0],
+    [0,0,1,2,2,1,0,0],
+    [0,0,1,1,1,1,0,0],
+    [0,0,0,0,0,0,0,0],
+    [0,0,0,0,0,0,0,0]
+  ];
+
+  for (i = 0; i < 8; i++) {
+    points += math.dot(control_points[i], board[i]);
+  }
+
+  return points;
+}
+
+var featureMixed = function(gameBoard) {
+  /* Takes care of any edge cases where gameBoard is over */
+  if (gameBoard.in_checkmate() && gameBoard.turn() == 'light') {
+    return -100;
+  } else if (gameBoard.in_checkmate()) {
+    return 100;
+  } else if (gameBoard.game_over()) {
+    return 0;
+  }
+  
+  var points = 0;
+  points += $('input[name="points"]').val()*featurePoints(gameBoard);
+  points += $('input[name="control"]').val()*featureControl(gameBoard);
 
   return points;
 }
@@ -181,7 +278,7 @@ var onDrop = function(source, target) {
       featureFxn = featurePoints;
       break;
     case 'control':
-      featureFxn = featurePoints;
+      featureFxn = featureControl;
       break;
     case 'defense':
       featureFxn = featurePoints;
@@ -190,23 +287,13 @@ var onDrop = function(source, target) {
       featureFxn = featurePoints;
       break;
     case 'mixed':
-      featureFxn = featurePoints;
+      featureFxn = featureMixed;
       break;
     default:
       featureFxn = featurePoints;
   }
 
-  /* Selection for AI */
-  switch (algorithm) {
-    case 'random':
-      window.setTimeout(makeRandomMove, 250);
-      break;
-    case 'minmax':
-      window.setTimeout(minMaxMove, 250);
-      break;
-    default:
-      window.setTimeout(makeRandomMove, 250);
-  }
+  window.setTimeout(minMaxMove, 250);
 };
 
 /* Syncs the board for edge cases */

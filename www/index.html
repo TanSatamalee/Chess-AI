@@ -9,6 +9,7 @@
 	<script src="js/json3.min.js"></script>
 	<script src="js/jquery-1.10.1.min.js"></script>
 	<script src="js/chessboard.js"></script>
+	<script src="js/math.js"></script>
 	<script src="simple_ai.js"></script>
 
 	<div id="board" class="chessboard" style="width: 400px;"></div>
@@ -17,15 +18,13 @@
 	<div id="userinput">
 		<input type="button" id="resetBtn" value="Reset" /><br>
 		<br>
-
-		<input type="radio" class="alg" name="algorithm" value="random" /> Random<br>
-		<input type="radio" class="alg" name="algorithm" value="minmax" /> MinMax<br>
-		
-
-		<br>
 		<input type="text" name="iterate" value="1"><br>
-		<input type="radio" class="feature" name="feature" value="points" /> Pieces/Points<br>
-		<input type="radio" class="feature" name="feature" value="control" /> Control<br>
+		<input type="radio" class="feature" name="feature" value="points" /> Pieces/Points <br>
+		<input type="radio" class="feature" name="feature" value="control" /> Control <br>
+		<input type="radio" class="feature" name="feature" value="mixed" /> Mixed <br>
+		<p> For mixed type in coefficients for each feature wanted (0 if not counting that feature. </p>
+		<input type="text" name="points" value="1"><br>
+		<input type="text" name="control" value="1"><br>
 	</div>
 
 </html>
